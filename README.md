@@ -4,8 +4,6 @@
 
 ## 特点
 
-- 可视化界面操作
-- 定时任务统一管理
 - 完全兼容Crontab
 - 支持秒级定时任务
 - 作业任务可搜索、暂停、编辑、删除
@@ -32,4 +30,4 @@ uvicorn app.main:app --workers=4 --host 0.0.0.0 --port 8000 --reload
 
 ## License
 
-This project is licensed under the terms of the GNU license.
+This project is licensed under the terms of the MIT license.
