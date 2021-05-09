@@ -1,8 +1,9 @@
 from __future__ import absolute_import
+import re
 
 import six
 import json
-from typing import Optional
+from typing import List, Optional
 
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from apscheduler.util import maybe_ref, datetime_to_utc_timestamp
@@ -22,6 +23,7 @@ try:
     from sqlalchemy import (
         create_engine, Table, Column, MetaData, Unicode, Float, LargeBinary, select, String, Enum)
     from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.orm.query import Query
     from sqlalchemy.exc import IntegrityError
     from sqlalchemy.sql.expression import null
 except ImportError:  # pragma: nocover
@@ -31,7 +33,7 @@ from app.common.logger import logger
 
 from .utils import get_job_trigger_name, job_to_dict
 from .models import JobRecord
-from app.core.config import settings
+from app.config import settings
 from .tasks import Task
 from app.database import db
 
@@ -102,12 +104,12 @@ class ExtendSQLAlchemyJobStore(SQLAlchemyJobStore):
         if result.rowcount == 0:
             raise JobLookupError(job.id)
 
-    def query_jobs(self, **conditions):
+    def query_jobs(self, **conditions) -> Query:
         jobs = self._query_jobs(**conditions)
         self._fix_paused_jobs_sorting(jobs)
         return jobs
 
-    def _query_jobs(self, **conditions):
+    def _query_jobs(self, **conditions) -> Query:
         jobs = []
         queryset = self.db.query(self.jobs_t).order_by(self.jobs_t.c.next_run_time)
         state = conditions.pop('state', None)
@@ -151,7 +153,7 @@ jobstores = {
 schedule = ExtendAsyncIOScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
 
 
-def save_record(event: SchedulerEvent, job: Job):
+def save_record(event: SchedulerEvent, job: Job) -> JobRecord:
 
     if event.code == EVENT_JOB_EXECUTED:
         result = 'SUCCESS'
@@ -178,9 +180,10 @@ def save_record(event: SchedulerEvent, job: Job):
     db.add(record)
     db.commit()
     db.flush()
+    return record
 
 
-def job_lister(event: SchedulerEvent):
+def job_lister(event: SchedulerEvent) -> None:
     job = schedule.get_job(event.job_id)
     save_record(event, job)
     if event.code == EVENT_JOB_EXECUTED:

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .route import router
-from app.core.config import settings
+from app.config import settings
 from job.scheduler import schedule
 from app.common.logger import logger
 from .database import create_table

@@ -8,6 +8,7 @@ from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
 from pydantic import BaseModel, validator
+
 from .tasks import Task
 
 class TriggerSchema(BaseModel):
@@ -27,7 +28,7 @@ class TriggerSchema(BaseModel):
 
 
     @validator('run_time')
-    def validate_run_time(cls, run_time:str, values: Optional[dict]) -> str:
+    def validate_run_time(cls, run_time:str, values: Optional[Dict]) -> str:
         if values['trigger'] == 'date':
             try:
                 datetime.strptime(run_time, '%Y-%m-%d %H:%M:%S')

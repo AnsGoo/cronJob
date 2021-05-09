@@ -1,0 +1,8 @@
+fastapi==0.61.1
+pydantic==1.7.3
+PyMySQL==1.0.2
+APScheduler==3.6.3
+ujson==4.0.1
+loguru==0.5.3
+uvicorn==0.13.3
+dateutils==0.6.12

@@ -1,12 +1,16 @@
-from typing import Union
 
-import dateutil.parser
 import six
+import dateutil.parser
+from datetime import datetime
+from typing import Union, List, Dict, Tuple
+
 
 from collections import OrderedDict
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.job import Job
+from .tasks import Task
 
 
 def get_job_trigger_name(trigger: Union[CronTrigger, IntervalTrigger, DateTrigger]) -> str:
@@ -18,11 +22,7 @@ def get_job_trigger_name(trigger: Union[CronTrigger, IntervalTrigger, DateTrigge
         return 'cron'
 
 
-
-
-
-from .tasks import Task
-def job_to_dict(job):
+def job_to_dict(job:Job) -> Dict:
     """Converts a job to an OrderedDict."""
     args = []
     if len(job.args) > 1:
@@ -44,7 +44,7 @@ def job_to_dict(job):
     return data
 
 
-def pop_trigger(data):
+def pop_trigger(data:Dict) -> Tuple[str]:
     """Pops trigger and trigger args from a given dict."""
 
     trigger_name = data.pop('trigger')
@@ -66,7 +66,7 @@ def pop_trigger(data):
     return trigger_name, trigger_args
 
 
-def trigger_to_dict(trigger):
+def trigger_to_dict(trigger: Union[DateTrigger, IntervalTrigger, CronTrigger]) -> Dict:
     """Converts a trigger to an OrderedDict."""
 
     data = OrderedDict()
@@ -106,7 +106,7 @@ def trigger_to_dict(trigger):
     return data
 
 
-def fix_job_def(job_def):
+def fix_job_def(job_def:Dict) -> Dict:
     """
     Replaces the datetime in string by datetime object.
     """
@@ -122,14 +122,13 @@ def fix_job_def(job_def):
     if isinstance(job_def.get('run_date'), six.string_types):
         job_def['run_date'] = dateutil.parser.parse(job_def.get('run_date'))
 
-    # it keeps compatibility backward
     if isinstance(job_def.get('trigger'), dict):
         trigger = job_def.pop('trigger')
         job_def['trigger'] = trigger.pop('type', 'date')
         job_def.update(trigger)
 
 
-def extract_timedelta(delta):
+def extract_timedelta(delta: datetime) -> Tuple[int]:
     w, d = divmod(delta.days, 7)
     mm, ss = divmod(delta.seconds, 60)
     hh, mm = divmod(mm, 60)

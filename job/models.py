@@ -1,4 +1,5 @@
 import json
+from typing import Dict
 from sqlalchemy import Column, Integer, String, Text, Enum, DateTime
 from app.database import Base
 
@@ -14,7 +15,7 @@ class JobRecord(Base):
     out = Column(Text, nullable=True, server_default=None)
     runtime = Column(DateTime)
 
-    def to_json(self):
+    def to_json(self) -> Dict:
         return {
             'id': self.id,
             'name': self.name,
