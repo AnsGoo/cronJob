@@ -1,7 +1,10 @@
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseSettings, validator, AnyUrl
+from pydantic import AnyHttpUrl, BaseModel, BaseSettings, validator, AnyUrl
+
+from scheduler.schema import SchedulerConfig
+from scheduler.schema import SchedulerConfig, JobStore, JobExecutorPool
 
 class MySQLDSN(AnyUrl):
 
@@ -61,6 +64,33 @@ class Settings(BaseSettings):
             user=values.get("DB_USER",'root'),
             password=values.get("DB_PASSWORD"),
             port=values.get("BD_PORT",'3306')
+        )
+
+    SCHEDULER_CONFIG: Optional[SchedulerConfig]
+
+    @validator("SCHEDULER_CONFIG", pre=True)
+    def init_scheduler(cls, v: Optional[SchedulerConfig], values: Mapping[str, Any]) -> SchedulerConfig:
+        url = MySQLDSN.build(
+            host=values.get("BD_HOST"),
+            dbname=values.get('DB_NAME'),
+            scheme="mysql+pymysql",
+            user=values.get("DB_USER",'root'),
+            password=values.get("DB_PASSWORD"),
+            port=values.get("BD_PORT",'3306')
+        )
+
+        return SchedulerConfig(executors={
+                'default': JobExecutorPool(type='thread',size=3).build(),
+                'processpool': JobExecutorPool(type='process',size=3).build()
+            },
+            default= {
+                'coalesce': False,
+                'max_instances': 1
+            },
+            stores={
+                'default': JobStore(type='sqlalchemy', url=url).build(),
+                'test': JobStore(type='sqlalchemy', url=url).build()
+            }
         )
 
     class Config:

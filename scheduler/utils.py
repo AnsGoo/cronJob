@@ -10,7 +10,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.job import Job
-from .tasks import Task
+from scheduler.task import BaseTask
 
 
 def get_job_trigger_name(trigger: Union[CronTrigger, IntervalTrigger, DateTrigger]) -> str:
@@ -26,7 +26,7 @@ def job_to_dict(job:Job) -> Dict:
     """Converts a job to an OrderedDict."""
     args = []
     if len(job.args) > 1:
-        args = [arg for arg in job.args if not isinstance(arg,Task)]
+        args = [arg for arg in job.args if not isinstance(arg,BaseTask)]
     data = OrderedDict()
     data['id'] = job.id
     data['name'] = job.name

@@ -1,6 +1,7 @@
 from typing import Dict, List
+from scheduler.task import BaseTask
 
-class Task:
+class Task(BaseTask):
     def task_test(self) -> None:
         '''
         测试任务

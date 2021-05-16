@@ -144,14 +144,14 @@ class JobSchema(BaseModel):
 
 
     @validator('next_run_time', always=True)
-    def validate_next_run_time(cls, next_run_time:datetime, values: Optional[Dict]):
+    def validate_next_run_time(cls, next_run_time:datetime, values: Optional[Dict]) -> str:
         if not next_run_time is None:
             return next_run_time
         else:
             return undefined
 
     @validator('misfire_grace_time', always=True)
-    def validate_misfire_grace_time(cls, misfire_grace_time: int, values: Optional[Dict]):
+    def validate_misfire_grace_time(cls, misfire_grace_time: int, values: Optional[Dict]) -> str:
         if not misfire_grace_time is None:
             return misfire_grace_time
         else:
@@ -159,7 +159,7 @@ class JobSchema(BaseModel):
 
 
     @validator('coalesce', always=True)
-    def validate_coalesce(cls, coalesce: int, values: Optional[Dict]):
+    def validate_coalesce(cls, coalesce: int, values: Optional[Dict]) -> str:
         if not coalesce is None:
             return coalesce
         else:
@@ -167,7 +167,7 @@ class JobSchema(BaseModel):
 
 
     @validator('max_instances', always=True)
-    def validate_max_instances(cls, max_instances: int, values: Optional[Dict]):
+    def validate_max_instances(cls, max_instances: int, values: Optional[Dict]) -> int:
         if max_instances is None:
             return undefined
         else:

@@ -1,20 +1,29 @@
+
+from scheduler.utils import job_to_dict
 import uuid
-from typing import Optional
+from typing import Dict, Optional
 
 from fastapi import APIRouter, Path, Query, Body, Request, status, Response
 from fastapi.exceptions import HTTPException
-from job.scheduler import schedule
 from app.common.resp_code import resp_200, resp_201, resp_202
 from job.schemas import JobSchema, TriggerSchema
 from apscheduler.job import Job
+from scheduler.schedulers.asyncio import ExtendAsyncIOScheduler
 from job.tasks import Task
-from job.utils import job_to_dict
+from app.config import settings
+from app.state import default_state
 
 router = APIRouter()
+config = settings.SCHEDULER_CONFIG
 
-
+schedule = ExtendAsyncIOScheduler(
+            jobstores=config.stores, 
+            executors=config.executors, 
+            job_defaults=config.default
+        )
 
 def _get_job(job_id: str) -> Job:
+    schedule = default_state.schedule
     job = schedule.get_job(job_id)
     if job:
         return job
@@ -33,6 +42,8 @@ async def get_jobs(
     获取所有job
     :return:
     """
+    schedule = default_state.schedule
+
     query_params =  request.query_params._dict
     status = query_params.pop('status', None)
     state = None
@@ -57,8 +68,8 @@ async def get_job(
 # cron 更灵活的定时任务 可以使用crontab表达式
 @router.post("/jobs/", tags=["job"], summary='添加job')
 async def add_job(job: JobSchema = Body(..., embed=True)) -> Response:
-    print(job)
     job_id = str(uuid.uuid1())
+    schedule = default_state.schedule
     schedule_job = schedule.add_job(
         func=job.func,
         trigger=job.trigger.build(),
@@ -82,6 +93,7 @@ async def remove_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
     _get_job(job_id=job_id)
+    schedule = default_state.schedule
     schedule.remove_job(job_id)
     return resp_202('OK')
 
@@ -91,6 +103,7 @@ async def pause_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
     job = _get_job(job_id=job_id)
+    schedule = default_state.schedule
     schedule.pause_job(job_id)
     job = _get_job(job_id=job_id)
     return resp_202(job_to_dict(job))
@@ -101,6 +114,7 @@ async def resume_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
     _get_job(job_id=job_id)
+    schedule = default_state.schedule
     schedule.resume_job(job_id)
     job = _get_job(job_id=job_id)
     return resp_202(job_to_dict(job))
@@ -113,6 +127,7 @@ async def reschedule_job(
         jobstore: str = Body('default',title="存储器", embed=True)
 ) -> Response:
     _get_job(job_id=job_id)
+    schedule = default_state.schedule
     schedule.reschedule_job(job_id, jobstore=jobstore, trigger=trigger)
     job = _get_job(job_id=job_id)
     return resp_202(job_to_dict(job))
@@ -120,12 +135,14 @@ async def reschedule_job(
 
 @router.get("/job/stores", tags=["job"], summary="获取stores")
 async def get_stores() -> Response:
+    schedule = default_state.schedule
     stores = list(schedule._jobstores.keys())
     return resp_200(data=stores)
 
 
 @router.get("/job/executors", tags=["job"], summary="获取")
 async def get_executors() -> Response:
+    schedule = default_state.schedule
     executors = list(schedule._executors.keys())
     return resp_200(data=executors)
 

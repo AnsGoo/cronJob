@@ -1,57 +1,24 @@
+
 from __future__ import absolute_import
-import re
-
-import six
-import json
-from typing import List, Optional
-
+import pickle
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from apscheduler.util import maybe_ref, datetime_to_utc_timestamp
-from apscheduler.events import EVENT_JOB_MISSED,EVENT_JOB_ERROR, EVENT_JOB_EXECUTED, SchedulerEvent
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
-from apscheduler.schedulers.base import STATE_STOPPED
 from apscheduler.job import Job
 
 try:
-    import cPickle as pickle
-except ImportError:  # pragma: nocover
-    import pickle
-
-try:
     from sqlalchemy import (
-        create_engine, Table, Column, MetaData, Unicode, Float, LargeBinary, select, String, Enum)
+        create_engine, Table, Column, MetaData, Unicode, Float, LargeBinary, String, Enum)
     from sqlalchemy.orm import sessionmaker
     from sqlalchemy.orm.query import Query
     from sqlalchemy.exc import IntegrityError
-    from sqlalchemy.sql.expression import null
 except ImportError:  # pragma: nocover
     raise ImportError('SQLAlchemyJobStore requires SQLAlchemy installed')
 
-from app.common.logger import logger
+from scheduler.utils import get_job_trigger_name
 
-from .utils import get_job_trigger_name, job_to_dict
-from .models import JobRecord
-from app.config import settings
-from .tasks import Task
-from app.database import db
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 
-
-class ExtendAsyncIOScheduler(AsyncIOScheduler):
-    def query_jobs(self, jobstore: str=None, conditions: Optional[dict]=dict()):
-        with self._jobstores_lock:
-            jobs = []
-            if self.state == STATE_STOPPED:
-                for job, alias, replace_existing in self._pending_jobs:
-                    if jobstore is None or alias == jobstore:
-                        jobs.append(job)
-            else:
-                for alias, store in six.iteritems(self._jobstores):
-                    if jobstore is None or alias == jobstore:
-
-                        jobs.extend(store.query_jobs(**conditions))
-            return jobs
 
 class ExtendSQLAlchemyJobStore(SQLAlchemyJobStore):
     def __init__(self, url=None, engine=None, tablename='apscheduler_jobs', metadata=None,
@@ -120,7 +87,6 @@ class ExtendSQLAlchemyJobStore(SQLAlchemyJobStore):
                 queryset = queryset.filter(self.jobs_t.c.next_run_time.isnot(None))
             else:
                 queryset = queryset.filter(self.jobs_t.c.next_run_time==None)
-
         queryset = queryset.all()
         failed_job_ids = set()
         for row in queryset:
@@ -136,65 +102,3 @@ class ExtendSQLAlchemyJobStore(SQLAlchemyJobStore):
             self.engine.execute(delete)
 
         return jobs
-
-executors = {
-    'default': ThreadPoolExecutor(10),
-    'processpool': ProcessPoolExecutor(3)
-}
-
-job_defaults = {
-    'coalesce': True,
-    'max_instances': 3
-}
-
-jobstores = {
-    'default': ExtendSQLAlchemyJobStore(url=settings.DATABASE_URI)
-}
-schedule = ExtendAsyncIOScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
-
-
-def save_record(event: SchedulerEvent, job: Job) -> JobRecord:
-
-    if event.code == EVENT_JOB_EXECUTED:
-        result = 'SUCCESS'
-    elif event.code == EVENT_JOB_ERROR:
-        result = 'FAILED'
-    elif event.code == EVENT_JOB_MISSED:
-        result = 'MISSED'
-
-    args = []
-    if len(job.args) > 1:
-        args = [arg for arg in job.args if not isinstance(arg,Task)]
-
-    data = {
-            'job_id': job.id,
-            'name': job.name,
-            'args': json.dumps(args),
-            'kwargs': json.dumps(job.kwargs),
-            'trigger': get_job_trigger_name(job.trigger),
-            'result': result,
-            'out': event.traceback,
-            'runtime': event.scheduled_run_time
-        }
-    record = JobRecord(**data)
-    db.add(record)
-    db.commit()
-    db.flush()
-    return record
-
-
-def job_lister(event: SchedulerEvent) -> None:
-    job = schedule.get_job(event.job_id)
-    save_record(event, job)
-    if event.code == EVENT_JOB_EXECUTED:
-        logger.info('job[%s] %s run SUCCESS at %s'%(job.id, job.name, event.scheduled_run_time))
-    elif event.code == EVENT_JOB_ERROR:
-        logger.error('job[%s] %s run FAILED at %s, error info: \n %s'%(job.id, job.name, event.scheduled_run_time, event.traceback))
-    elif event.code == EVENT_JOB_MISSED:
-        logger.warning('job[%s] %s run MISSED at %s'%(job.id, job.name, event.scheduled_run_time))
-
-
-
-
-
-schedule.add_listener(job_lister, EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)

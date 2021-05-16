@@ -25,7 +25,6 @@ async def get_records(
     query_params = request.query_params._dict
     page = int(query_params.pop('page', 0))
     page_size = int(query_params.pop('page_size', 10))
-    print(query_params)
     queryset = db.query(JobRecord).filter_by(**query_params)
     if page > 0:
         temp_page = (page - 1) * page_size

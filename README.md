@@ -2,6 +2,11 @@
 
 本项目采用[FastAPI](https://github.com/tiangolo/fastapi) + [APSchduler](https://github.com/topics/apscheduler) 开发轻量级定时调度平台
 
+![](https://img.shields.io/github/license/AnsGoo/cornJob?style=for-the-badge)
+![](https://img.shields.io/github/stars/AnsGoo/cornJob?style=for-the-badge)
+![](https://img.shields.io/github/issues/AnsGoo/cornJob?style=for-the-badge)
+![](https://img.shields.io/github/forks/AnsGoo/cornJob?style=for-the-badge)
+
 ## 特点
 
 - 完全兼容Crontab
