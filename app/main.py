@@ -101,11 +101,12 @@ def register_scheduler(app: FastAPI) -> None:
                 schedule.add_listener(lister,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)
                 schedule.start()
                 default_state.schedule = schedule
+                default_state.set('schedule', schedule)
             except BlockingIOError:
                 pass
         else:
             schedule.start()
-            default_state.schedule.schedule = schedule
+            default_state.set('schedule', schedule)
 
         logger.info("start Schedule Object")
 
@@ -118,9 +119,9 @@ def register_scheduler(app: FastAPI) -> None:
         if os.name == 'posix':
             fcntl.flock(f, fcntl.LOCK_UN)
             f.close()
-            default_state.schedule.schedule.shutdown()
-        else:
-            app.state.schedule.shutdown()
+        schedule = default_state.get('schedule',None)
+        if schedule:
+            schedule.shutdown()
         logger.warning("Schedule shutdown")
 
 app = get_application()

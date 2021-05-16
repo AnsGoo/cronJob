@@ -26,3 +26,4 @@ class JobRecord(Base):
             'out': self.out,
             'runtime': self.runtime
         }
+
