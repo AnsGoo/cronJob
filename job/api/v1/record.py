@@ -2,9 +2,12 @@
 from typing import Optional
 from fastapi import APIRouter, Query, Request, Response
 
-from app.common.resp_code import resp_200
+from job.schemas import RecordQueryParams
+from app.common.resp_code import resp_200, resp_400
 from job.models import JobRecord
 from app.database import db
+from utils.common import remove_none
+from pydantic import ValidationError
 
 router = APIRouter()
 
@@ -22,11 +25,15 @@ async def get_records(
     获取所有job
     :return:
     """
-    query_params = request.query_params._dict
-    page = int(query_params.pop('page', 0))
-    page_size = int(query_params.pop('page_size', 10))
-    queryset = db.query(JobRecord).filter_by(**query_params)
-    if page > 0:
+    try:
+        query_params = RecordQueryParams(**request.query_params._dict).dict()
+    except ValidationError as e:
+        return resp_400(e.errors())
+    query_conditions = remove_none(query_params)
+    page = query_conditions.pop('page')
+    page_size = query_conditions.pop('page_size')
+    queryset = db.query(JobRecord).filter_by(**query_conditions)
+    if page and page_size:
         temp_page = (page - 1) * page_size
         queryset = queryset.offset(temp_page).limit(page_size)
     data = [job.to_json() for job in queryset]

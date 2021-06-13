@@ -8,7 +8,7 @@ from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, ValidationError, conint
 
 from .tasks import Task
 
@@ -190,7 +190,7 @@ class JobQueryParams(BaseModel):
 
 
     @validator('state', pre=True)
-    def validate_coalesce(cls, state: int, values: Optional[Dict]) -> str:
+    def validate_state(cls, state: str, values: Optional[Dict]) -> str:
         if state == 'RUNNING':
             return True
         elif state == 'STOP':
@@ -198,6 +198,35 @@ class JobQueryParams(BaseModel):
         else:
             return None
 
+class RecordQueryParams(BaseModel):
+    status: Optional[str]
+    name: Optional[str]
+    trigger: Optional[str]
+    func: Optional[str]
+    page: Optional[conint(gt=0)]
+    page_size: Optional[conint(gt=0)]
+
+    # @validator('page', pre=True)
+    # def validate_page(cls, page: int, values: Optional[Dict]) -> str:
+    #     page = int(page)
+    #     if page:
+    #         if page > 0:
+    #             return page
+    #         else:
+    #             raise ValueError('page must be more than 1')
+    #     else:
+    #         return None
+    
+    # @validator('page_size', pre=True)
+    # def validate_page_size(cls, page_size: int, values: Optional[Dict]) -> str:
+    #     page_size = int(page_size)
+    #     if page_size:
+    #         if page_size > 0:
+    #             return page_size
+    #         else:
+    #             raise ValueError('page_size must be more than 1')
+    #     else:
+    #         return None
 
 
 

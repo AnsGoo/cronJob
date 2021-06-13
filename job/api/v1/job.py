@@ -3,10 +3,10 @@ import pdir
 from scheduler.utils import job_to_dict
 import uuid
 from typing import Dict, Optional
-
+from pydantic import ValidationError
 from fastapi import APIRouter, Path, Query, Body, Request, status, Response
 from fastapi.exceptions import HTTPException
-from app.common.resp_code import resp_200, resp_201, resp_202
+from app.common.resp_code import resp_200, resp_201, resp_202, resp_400
 from job.schemas import JobSchema, TriggerSchema, JobQueryParams
 from apscheduler.job import Job
 from scheduler.schedulers.asyncio import ExtendAsyncIOScheduler
@@ -47,9 +47,11 @@ async def get_jobs(
     :return:
     """
     schedule = default_state.get('schedule')
-    query_params =  request.query_params._dict
-    query_condtions = JobQueryParams(**query_params)
-    print(query_condtions.dict())
+    try:
+        query_params =  request.query_params._dict
+        query_condtions = JobQueryParams(**query_params)
+    except ValidationError as e:
+        return resp_400(e.errors())
     jobs = schedule.query_jobs(conditions=remove_none(query_condtions.dict()))
     data = [job_to_dict(job) for job in jobs]
     return resp_200(data=data)
