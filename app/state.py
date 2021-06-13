@@ -1,5 +1,4 @@
 from typing import Any
-
 from starlette.datastructures import State
 
 
@@ -7,7 +6,7 @@ class DefaultState:
 
     state  = State()
 
-    def get(self,key:str, value:Any) -> Any:
+    def get(self,key:str, value: Any = None) -> Any:
         if hasattr(self.state, key):
             return getattr(self.state, key)
         else:
