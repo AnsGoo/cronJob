@@ -1,4 +1,5 @@
 
+import pdir
 from scheduler.utils import job_to_dict
 import uuid
 from typing import Dict, Optional
@@ -6,12 +7,13 @@ from typing import Dict, Optional
 from fastapi import APIRouter, Path, Query, Body, Request, status, Response
 from fastapi.exceptions import HTTPException
 from app.common.resp_code import resp_200, resp_201, resp_202
-from job.schemas import JobSchema, TriggerSchema
+from job.schemas import JobSchema, TriggerSchema, JobQueryParams
 from apscheduler.job import Job
 from scheduler.schedulers.asyncio import ExtendAsyncIOScheduler
 from job.tasks import Task
 from app.config import settings
 from app.state import default_state
+from utils.common import remove_none
 
 router = APIRouter()
 config = settings.SCHEDULER_CONFIG
@@ -30,10 +32,12 @@ def _get_job(job_id: str) -> Job:
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='%s not found' %job_id)
 
+
+
 @router.get("/jobs/", tags=["job"], summary="获取所有job信息")
 async def get_jobs(
         request: Request,
-        status: Optional[str] = Query(None, title='job 状态',description='可选参数 RUNNING STOP'),
+        state: Optional[str] = Query(None, title='job 状态',description='可选参数 RUNNING STOP'),
         name: Optional[str] = Query(None, title='job name'),
         trigger: Optional[str] = Query(None, title='触发器类型', description='可选参数：date cron interval'),
         func: Optional[str] = Query(None, title='任务名称', description='任务的方法名称')
@@ -43,16 +47,10 @@ async def get_jobs(
     :return:
     """
     schedule = default_state.get('schedule')
-
     query_params =  request.query_params._dict
-    status = query_params.pop('status', None)
-    state = None
-    if status == 'RUNNING':
-        state = True
-    elif state == 'STOP':
-        state = False
-    query_params['state'] = state
-    jobs = schedule.query_jobs(conditions=query_params)
+    query_condtions = JobQueryParams(**query_params)
+    print(query_condtions.dict())
+    jobs = schedule.query_jobs(conditions=remove_none(query_condtions.dict()))
     data = [job_to_dict(job) for job in jobs]
     return resp_200(data=data)
 

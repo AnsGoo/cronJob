@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import Optional, List, Dict, Union, Any
+from fastapi import Query
 from apscheduler.triggers.cron.fields import (
     BaseField, MonthField, WeekField, DayOfMonthField, DayOfWeekField, DEFAULT_VALUES)
 from apscheduler.util import undefined
@@ -179,6 +180,23 @@ class JobSchema(BaseModel):
             return getattr(Task(),func)
         else:
             raise ValueError('not found %s task'%func)
+
+
+class JobQueryParams(BaseModel):
+    state: Optional[str]
+    name: Optional[str]
+    trigger: Optional[str]
+    func: Optional[str]
+
+
+    @validator('state', pre=True)
+    def validate_coalesce(cls, state: int, values: Optional[Dict]) -> str:
+        if state == 'RUNNING':
+            return True
+        elif state == 'STOP':
+            return False
+        else:
+            return None
 
 
 
