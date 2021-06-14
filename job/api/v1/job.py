@@ -16,13 +16,6 @@ from app.state import default_state
 from utils.common import remove_none
 
 router = APIRouter()
-config = settings.SCHEDULER_CONFIG
-
-schedule = ExtendAsyncIOScheduler(
-            jobstores=config.stores, 
-            executors=config.executors, 
-            job_defaults=config.default
-        )
 
 def _get_job(job_id: str) -> Job:
     schedule = default_state.get('schedule')
