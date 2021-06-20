@@ -8,11 +8,6 @@ from .route import router
 from app.config import settings
 from app.common.logger import logger
 from .database import create_table
-
-from scheduler.schedulers.asyncio import ExtendAsyncIOScheduler
-from apscheduler.events import EVENT_JOB_MISSED,EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
-from job.listener import CornJobListener
-
 from app.state import default_state
 
 
@@ -86,29 +81,9 @@ def register_scheduler(app: FastAPI) -> None:
     :param app:
     :return:
     """
-    f = open("scheduler.lock", "wb")
     @app.on_event("startup")
     async def load_schedule_or_create_blank():
-        # config = settings.SCHEDULER_CONFIG
-        # schedule = ExtendAsyncIOScheduler(
-        #     jobstores=config.stores, 
-        #     executors=config.executors, 
-        #     job_defaults=config.default
-        # )
-        # if os.name == 'posix':
-        #     try:
-        #         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        #         listener = CornJobListener(schedule=schedule).job_listener
-        #         schedule.add_listener(listener,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)
-        #         schedule.start()
-        #         print(schedule._jobstores)
-        #     except BlockingIOError:
-        #         pass
-        # else:
-        #     schedule.start()
-        # default_state.set('schedule', schedule)
-
-        logger.info("start Schedule Object")
+        create_table()
 
     @app.on_event('shutdown')
     async def shutdown_schedule():
@@ -116,14 +91,8 @@ def register_scheduler(app: FastAPI) -> None:
         关闭调度对象
         :return:
         """
-        if os.name == 'posix':
-            fcntl.flock(f, fcntl.LOCK_UN)
-            f.close()
-        schedule = default_state.get('schedule',None)
-        if schedule:
-            schedule.shutdown()
-        logger.warning("Schedule shutdown")
+        pass
 
 app = get_application()
 
-create_table()
+
