@@ -42,7 +42,7 @@ class CornJobListener(JobBaseListener):
         db.commit()
         db.flush()
 
-    def job_lister(self,event: JobEvent) -> None:
+    def job_listener(self,event: JobEvent) -> None:
         job = self.schedule.get_job(event.job_id)
         self.save_record(event, job)
         if event.code == EVENT_JOB_EXECUTED:

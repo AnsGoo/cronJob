@@ -12,6 +12,7 @@ from .database import create_table
 from scheduler.schedulers.asyncio import ExtendAsyncIOScheduler
 from apscheduler.events import EVENT_JOB_MISSED,EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from job.listener import CornJobListener
+
 from app.state import default_state
 
 
@@ -88,25 +89,24 @@ def register_scheduler(app: FastAPI) -> None:
     f = open("scheduler.lock", "wb")
     @app.on_event("startup")
     async def load_schedule_or_create_blank():
-        config = settings.SCHEDULER_CONFIG
-        schedule = ExtendAsyncIOScheduler(
-            jobstores=config.stores, 
-            executors=config.executors, 
-            job_defaults=config.default
-        )
-        if os.name == 'posix':
-            try:
-                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                lister = CornJobListener(schedule=schedule).job_lister
-                schedule.add_listener(lister,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)
-                schedule.start()
-                default_state.schedule = schedule
-                default_state.set('schedule', schedule)
-            except BlockingIOError:
-                pass
-        else:
-            schedule.start()
-            default_state.set('schedule', schedule)
+        # config = settings.SCHEDULER_CONFIG
+        # schedule = ExtendAsyncIOScheduler(
+        #     jobstores=config.stores, 
+        #     executors=config.executors, 
+        #     job_defaults=config.default
+        # )
+        # if os.name == 'posix':
+        #     try:
+        #         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        #         listener = CornJobListener(schedule=schedule).job_listener
+        #         schedule.add_listener(listener,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)
+        #         schedule.start()
+        #         print(schedule._jobstores)
+        #     except BlockingIOError:
+        #         pass
+        # else:
+        #     schedule.start()
+        # default_state.set('schedule', schedule)
 
         logger.info("start Schedule Object")
 

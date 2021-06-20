@@ -18,18 +18,28 @@ import os
 import time
 from loguru import logger
 
-# basedir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-basedir = os.path.dirname(os.path.dirname((os.path.dirname(os.path.abspath(__file__)))))
+from app.config import BASE_DIR
+log_path = BASE_DIR.joinpath('logs')
 
-# 定位到log日志文件
-log_path = os.path.join(basedir, 'logs')
-
-if not os.path.exists(log_path):
+if not log_path.exists():
     os.mkdir(log_path)
 
-log_path_error = os.path.join(log_path, f'{time.strftime("%Y-%m-%d")}_error.log')
+log_file = log_path.joinpath(f'{time.strftime("%Y-%m-%d")}.log')
+rpc_log_file = log_path.joinpath(f'rpc_{time.strftime("%Y-%m-%d")}.log')
 
+def rpc_filter(record):
+    if 'rpc' in record['name']:
+        return True
+    else:
+        return False
+
+def app_filter(record):
+    if 'app' in record['name']:
+        return True
+    else:
+        return False
 # 日志简单配置
-logger.add(log_path_error, rotation="12:00", retention="5 days", enqueue=True)
+logger.add(log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True)
+logger.add(rpc_log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True,filter=rpc_filter)
 
 __all__ = ["logger"]

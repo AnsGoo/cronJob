@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.douban.com/simple"
+verify_ssl = false
+name = "pypi"
+
+[packages]
+fastapi = "==0.61.1"
+pydantic = {extras = ["dotenv"], version = "*"}
+pymysql = "==1.0.2"
+apscheduler = "==3.6.3"
+ujson = "==4.0.1"
+loguru = "==0.5.3"
+uvicorn = "==0.13.3"
+dateutils = "==0.6.12"
+sqlalchemy = "*"
+zerorpc = "*"
+
+[dev-packages]
+pdir2 = "*"
+
+[requires]
+python_version = "3.8"

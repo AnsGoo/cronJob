@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from typing import Optional, List, Dict, Union, Any
+from xmlrpc.client import Boolean
 from fastapi import Query
 from apscheduler.triggers.cron.fields import (
     BaseField, MonthField, WeekField, DayOfMonthField, DayOfWeekField, DEFAULT_VALUES)
@@ -20,7 +21,7 @@ class TriggerSchema(BaseModel):
     timezone: Optional[str] = None
     jitter: Optional[int] = None
 
-    @validator('trigger')
+    @validator('trigger',pre=True)
     def validate_trigger(cls, trigger: str, values: Optional[Dict]) -> str:
         if trigger in ['date','interval','cron']:
           return trigger
@@ -87,7 +88,7 @@ class TriggerSchema(BaseModel):
                 minutes=data[1],
                 hours=data[2],
                 days=data[3],
-                week=data[4],
+                weeks=data[4],
                 start_date=self.start_date,
                 end_date=self.end_date,
                 timezone=self.timezone,
@@ -183,7 +184,7 @@ class JobSchema(BaseModel):
 
 
 class JobQueryParams(BaseModel):
-    state: Optional[str]
+    state: Optional[Boolean]
     name: Optional[str]
     trigger: Optional[str]
     func: Optional[str]
@@ -205,28 +206,6 @@ class RecordQueryParams(BaseModel):
     func: Optional[str]
     page: Optional[conint(gt=0)]
     page_size: Optional[conint(gt=0)]
-
-    # @validator('page', pre=True)
-    # def validate_page(cls, page: int, values: Optional[Dict]) -> str:
-    #     page = int(page)
-    #     if page:
-    #         if page > 0:
-    #             return page
-    #         else:
-    #             raise ValueError('page must be more than 1')
-    #     else:
-    #         return None
-    
-    # @validator('page_size', pre=True)
-    # def validate_page_size(cls, page_size: int, values: Optional[Dict]) -> str:
-    #     page_size = int(page_size)
-    #     if page_size:
-    #         if page_size > 0:
-    #             return page_size
-    #         else:
-    #             raise ValueError('page_size must be more than 1')
-    #     else:
-    #         return None
 
 
 

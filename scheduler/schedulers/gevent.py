@@ -3,11 +3,11 @@ import os
 import six
 from typing import List, Optional
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.gevent import GeventScheduler
 from apscheduler.schedulers.base import STATE_STOPPED
 
 
-class ExtendAsyncIOScheduler(AsyncIOScheduler):
+class ExtendGeventcheduler(GeventScheduler):
     def query_jobs(self, jobstore: str=None, conditions: Optional[dict]=dict()):
         with self._jobstores_lock:
             jobs = []

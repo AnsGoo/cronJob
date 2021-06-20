@@ -39,7 +39,7 @@ def job_to_dict(job:Job) -> Dict:
     if not job.pending:
         data['misfire_grace_time'] = job.misfire_grace_time
         data['max_instances'] = job.max_instances
-        data['next_run_time'] = None if job.next_run_time is None else job.next_run_time
+        data['next_run_time'] = None if job.next_run_time is None else job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
 
     return data
 
@@ -73,13 +73,13 @@ def trigger_to_dict(trigger: Union[DateTrigger, IntervalTrigger, CronTrigger]) -
 
     if isinstance(trigger, DateTrigger):
         data['trigger'] = 'date'
-        data['run_date'] = trigger.run_date
+        data['run_date'] = trigger.run_date.strftime("%Y-%m-%d %H:%M:%S")
     elif isinstance(trigger, IntervalTrigger):
         data['trigger'] = 'interval'
-        data['start_date'] = trigger.start_date
+        data['start_date'] = trigger.start_date.strftime("%Y-%m-%d %H:%M:%S")
 
         if trigger.end_date:
-            data['end_date'] = trigger.end_date
+            data['end_date'] = trigger.end_date.strftime("%Y-%m-%d %H:%M:%S")
         times = [str(item) for item in extract_timedelta(trigger.interval)]
         times.reverse()
         data['run_time'] = ' '.join(times)

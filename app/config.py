@@ -6,6 +6,10 @@ from pydantic import AnyHttpUrl, BaseModel, BaseSettings, validator, AnyUrl
 from scheduler.schema import SchedulerConfig
 from scheduler.schema import SchedulerConfig, JobStore, JobExecutorPool
 
+from pathlib import Path
+
+BASE_DIR = Path.cwd().parent
+
 class MySQLDSN(AnyUrl):
 
     def __init__(self, *args, **kwargs): # real signature unknown
@@ -88,11 +92,11 @@ class Settings(BaseSettings):
                 'max_instances': 1
             },
             stores={
-                'default': JobStore(type='sqlalchemy', url=url).build(),
-                'test': JobStore(type='sqlalchemy', url=url).build()
+                'default': JobStore(type='sqlalchemy', url=url).build()
             }
         )
-
+    RPC_URL:str
+    RPC_POOL_SIZE:int = 1
     class Config:
         case_sensitive = True
         env_file = ".env"

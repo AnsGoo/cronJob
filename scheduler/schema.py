@@ -1,10 +1,8 @@
 from typing import Any, Dict, Mapping, Optional
-from numpy.distutils.command.config import config
 from pydantic import BaseModel, validator
 
 from apscheduler.executors.pool import BasePoolExecutor, ThreadPoolExecutor, ProcessPoolExecutor
 from apscheduler.jobstores.base import BaseJobStore
-from sqlalchemy.engine import base
 from scheduler.stores import ExtendSQLAlchemyJobStore 
 
 from enum import Enum
