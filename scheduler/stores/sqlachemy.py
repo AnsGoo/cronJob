@@ -32,7 +32,7 @@ class ExtendSQLAlchemyJobStore(SQLAlchemyJobStore):
         else:
             raise ValueError('Need either "engine" or "url" defined')
 
-        sessionLocal = sessionmaker(bind=self.engine)
+        sessionLocal = sessionmaker(bind=self.engine,autocommit=True, autoflush=True)
         self.db = sessionLocal()
         self.jobs_t = Table(
             tablename, metadata,
