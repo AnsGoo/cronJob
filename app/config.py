@@ -1,14 +1,14 @@
 
 from typing import Any, Dict, List, Mapping, Optional, Union
 
-from pydantic import AnyHttpUrl, BaseModel, BaseSettings, validator, AnyUrl
+from pydantic import AnyHttpUrl, BaseSettings, validator, AnyUrl
 
 from scheduler.schema import SchedulerConfig
 from scheduler.schema import SchedulerConfig, JobStore, JobExecutorPool
 
 from pathlib import Path
 
-BASE_DIR = Path.cwd().parent
+BASE_DIR = Path.cwd()
 
 class MySQLDSN(AnyUrl):
 

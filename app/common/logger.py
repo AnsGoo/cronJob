@@ -26,20 +26,28 @@ if not log_path.exists():
 
 log_file = log_path.joinpath(f'{time.strftime("%Y-%m-%d")}.log')
 rpc_log_file = log_path.joinpath(f'rpc_{time.strftime("%Y-%m-%d")}.log')
-
+schduler_log_file = log_path.joinpath(f'scheduler_{time.strftime("%Y-%m-%d")}.log')
 def rpc_filter(record):
     if 'rpc' in record['name']:
         return True
     else:
         return False
 
-def app_filter(record):
-    if 'app' in record['name']:
+def scheduler_filter(record):
+    if 'job.listener' in record['name']:
         return True
     else:
         return False
-# 日志简单配置
-logger.add(log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True)
-logger.add(rpc_log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True,filter=rpc_filter)
 
+def app_filter(record):
+    if 'job.listener' in record['name']:
+        return False
+    elif 'rpc' in record['name']:
+        return False
+    else:
+        return True
+# 日志简单配置
+logger.add(log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True,filter=app_filter)
+logger.add(rpc_log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True,filter=rpc_filter)
+logger.add(schduler_log_file, level='INFO', rotation="00:00", retention="5 days", enqueue=True,filter=scheduler_filter)
 __all__ = ["logger"]
