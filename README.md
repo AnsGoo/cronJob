@@ -1,11 +1,11 @@
-# CornJob
+# CronJob
 
-本项目采用[FastAPI](https://github.com/tiangolo/fastapi) + [APSchduler](https://github.com/topics/apscheduler) + [zeroRPC](https://github.com/0rpc/zerorpc-python)开发轻量级定时调度平台
+本项目采用[FastAPI](https://github.com/tiangolo/fastapi) + [APSchduler](https://github.com/topics/apscheduler) + [ZeroRPC](https://github.com/0rpc/zerorpc-python)开发轻量级定时调度平台
 
-![](https://img.shields.io/github/license/AnsGoo/cornJob?style=for-the-badge)
-![](https://img.shields.io/github/stars/AnsGoo/cornJob?style=for-the-badge)
-![](https://img.shields.io/github/issues/AnsGoo/cornJob?style=for-the-badge)
-![](https://img.shields.io/github/forks/AnsGoo/cornJob?style=for-the-badge)
+![](https://img.shields.io/github/license/AnsGoo/cronJob?style=for-the-badge)
+![](https://img.shields.io/github/stars/AnsGoo/cronJob?style=for-the-badge)
+![](https://img.shields.io/github/issues/AnsGoo/cronJob?style=for-the-badge)
+![](https://img.shields.io/github/forks/AnsGoo/cronJob?style=for-the-badge)
 
 ## 特点
 
@@ -25,32 +25,32 @@ pip install pipenv
 
 - 获取代码并激活虚拟环境
 
-```
-git clone https://github.com/AnsGoo/cornJob.git
+```shell
+git clone https://github.com/AnsGoo/cronJob.git
 pipenv shell
 
 ```
 
--  安装依赖
+- 安装依赖
 
 ```shell
 
-pipenv install
+pipenv sync
 
 ```
-- 运行
 
+- 运行
 
 ```shell
 
 // 开发
-uvicorn app.main:app --workers=4 --host 0.0.0.0 --port 8000 --reload
+pipenv run dev --host=0.0.0.0 --port=8000 --reload
+pipenv run rpc
 
 // 生产
 
-uvicorn app.main:app --workers=4 --host 0.0.0.0 --port 8000
-
-python3 rpc_server.py
+pipenv run server--workers=4 --host=0.0.0.0 --port=8000
+pipenv run rpc
 
 ```
 

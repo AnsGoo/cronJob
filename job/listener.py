@@ -11,7 +11,7 @@ from .tasks import Task
 
 
 
-class CornJobListener(JobBaseListener):
+class CronJobListener(JobBaseListener):
 
     def save_record(self,event: JobEvent, job: Job) -> None:
 

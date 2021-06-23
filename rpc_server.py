@@ -1,7 +1,7 @@
 import zerorpc
 from apscheduler.events import EVENT_JOB_MISSED,EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from scheduler.schedulers.gevent import ExtendGeventcheduler
-from job.listener import CornJobListener
+from job.listener import CronJobListener
 from app.common.logger import logger
 from app.config import settings
 from rpc import SchedulerService
@@ -14,7 +14,7 @@ scheduler = ExtendGeventcheduler(
     executors=config.executors, 
     job_defaults=config.default
 )
-listener = CornJobListener(schedule=scheduler).job_listener
+listener = CronJobListener(schedule=scheduler).job_listener
 scheduler.add_listener(listener,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MISSED)
 scheduler.start()
 try:
