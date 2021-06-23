@@ -20,3 +20,8 @@ pdir2 = "*"
 
 [requires]
 python_version = "3.8"
+
+[scripts]
+rpc "python  rpc_server.py"
+server "uvicorn app.main:app" 
+dev "uvicorn app.main:app"
