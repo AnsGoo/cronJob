@@ -15,6 +15,10 @@
 - 作业任务持久化存储、三种不同触发器类型作业动态添加
 - 采用RPC方式规避了APScheduler在多进程部署的情况下，任务被多次调度的问题
 
+## TODO
+
+[] WEB UI页面[cronJobFront](https://github.com/AnsGoo/cronJobFront) 
+
 ## 使用
 
 - 安装虚拟环境管理器
@@ -51,6 +55,21 @@ pipenv run rpc
 
 pipenv run server--workers=4 --host=0.0.0.0 --port=8000
 pipenv run rpc
+
+```
+
+- 开发任务
+
+在`job/tasks.py`的`Task`对象中自定义以`task`开头的任务即可在调度方法中调取该任务，例如：
+
+```python
+class Task(BaseTask):
+    def task_test(self) -> None:
+        '''
+        测试任务
+        :return:
+        '''
+        print('test')
 
 ```
 
