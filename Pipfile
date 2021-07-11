@@ -12,7 +12,7 @@ ujson = "==4.0.1"
 loguru = "==0.5.3"
 uvicorn = "==0.13.3"
 dateutils = "==0.6.12"
-sqlalchemy = "*"
+sqlalchemy = "1.4.20"
 zerorpc = "*"
 
 [dev-packages]
@@ -22,6 +22,6 @@ pdir2 = "*"
 python_version = "3.8"
 
 [scripts]
-rpc "python  rpc_server.py"
-server "uvicorn app.main:app" 
-dev "uvicorn app.main:app"
+rpc = "python  rpc_server.py"
+server = "uvicorn app.main:app" 
+dev = "uvicorn app.main:app"
