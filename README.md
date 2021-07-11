@@ -1,6 +1,6 @@
 # CronJob
 
-本项目采用[FastAPI](https://github.com/tiangolo/fastapi) + [APSchduler](https://github.com/topics/apscheduler) + [ZeroRPC](https://github.com/0rpc/zerorpc-python)开发轻量级定时调度平台
+本项目采用[FastAPI](https://github.com/tiangolo/fastapi) + [APScheduler](https://github.com/topics/apscheduler) + [ZeroRPC](https://github.com/0rpc/zerorpc-python)开发轻量级定时调度平台
 
 ![](https://img.shields.io/github/license/AnsGoo/cronJob?style=for-the-badge)
 ![](https://img.shields.io/github/stars/AnsGoo/cronJob?style=for-the-badge)
