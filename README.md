@@ -62,7 +62,7 @@ pipenv run rpc
 制作镜像
 
 ```shell
-docker build cronjob:v1
+docker build cronjob:v1 .
 ```
 
 运行
