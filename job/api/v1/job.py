@@ -102,7 +102,7 @@ async def reschedule_job(
         request: Request,
         trigger: TriggerSchema,
         job_id: str = Path(...,title="任务id", embed=True),
-        jobstore: str = 'default'
+        jobstore: Optional[str] = Body('default')
 ) -> Response:
     with get_client(settings.RPC_URL) as client: 
         _get_job(job_id=job_id, client=client)

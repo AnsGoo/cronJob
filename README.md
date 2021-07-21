@@ -57,7 +57,19 @@ pipenv run server--workers=4 --host=0.0.0.0 --port=8000
 pipenv run rpc
 
 ```
+- 部署
 
+制作镜像
+
+```shell
+docker build cronjob:v1
+```
+
+运行
+
+```shell
+docker run -p 8000:8000 -p 4242:4242 --name cronjob -it cronjob:v1
+```
 - 开发任务
 
 在`job/tasks.py`的`Task`对象中自定义以`task`开头的任务即可在调度方法中调取该任务，例如：
