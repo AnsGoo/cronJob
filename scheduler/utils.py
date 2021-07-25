@@ -33,6 +33,7 @@ def job_to_dict(job:Job) -> Dict:
     data['func'] = job.func_ref
     data['args'] = args
     data['kwargs'] = job.kwargs
+    data['jobstore'] = job._jobstore_alias
 
     data.update(trigger_to_dict(job.trigger))
 

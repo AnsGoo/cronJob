@@ -14,10 +14,11 @@
 - 作业任务可搜索、暂停、编辑、删除
 - 作业任务持久化存储、三种不同触发器类型作业动态添加
 - 采用RPC方式规避了APScheduler在多进程部署的情况下，任务被多次调度的问题
+- 提供图形化的管理页面
 
 ## TODO
 
-- [ ] WEB UI页面[cronJobFront](https://github.com/AnsGoo/cronJobFront) 
+- [ ] WEB UI页面优化[cronJobFront](https://github.com/AnsGoo/cronJobFront) 
 
 ## 使用
 

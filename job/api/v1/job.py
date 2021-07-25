@@ -106,25 +106,25 @@ async def reschedule_job(
 ) -> Response:
     with get_client(settings.RPC_URL) as client: 
         _get_job(job_id=job_id, client=client)
-        data = await request.json()
-        job = client.reschedule_job(job_id, jobstore=jobstore, trigger=data)
+        data = await request.json()       
+        job, result = client.reschedule_job(job_id, data.get('trigger'), jobstore)
     return resp_202(job)
 
 
-@router.get("/job/stores", tags=["job"], summary="获取stores")
+@router.get("/job/stores/", tags=["job"], summary="获取stores")
 async def get_stores() -> Response:
     with get_client(settings.RPC_URL) as client:
         stores = client.get_stores()
-    return resp_200(data=stores)
+    return resp_200(data=[{ 'name': item for item in stores}])
 
 
-@router.get("/job/executors", tags=["job"], summary="获取")
+@router.get("/job/executors/", tags=["job"], summary="获取")
 async def get_executors() -> Response:
     with get_client(settings.RPC_URL) as client:
         executors = client.get_executors()
-    return resp_200(data=executors)
+    return resp_200(data=[{ 'name': item for item in executors}])
 
-@router.get("/job/tasks", tags=["job"], summary="获取可用Task")
+@router.get("/job/tasks/", tags=["job"], summary="获取可用Task")
 async def get_tasks() -> Response:
     tasks = Task().methods()
     data = []

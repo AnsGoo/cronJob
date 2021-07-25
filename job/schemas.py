@@ -200,10 +200,9 @@ class JobQueryParams(BaseModel):
             return None
 
 class RecordQueryParams(BaseModel):
-    status: Optional[str]
+    result: Optional[str]
     name: Optional[str]
     trigger: Optional[str]
-    func: Optional[str]
     page: Optional[conint(gt=0)]
     page_size: Optional[conint(gt=0)]
 

@@ -47,7 +47,7 @@ class SchedulerService:
         except ValidationError as e:
             return None, e.json()
 
-        job = self.scheduler.reschedule_job(job_id, jobstore, trigger=schema)
+        job = self.scheduler.reschedule_job(job_id, jobstore, trigger=schema.build())
         return job_to_dict(job), Result.sucess.value
 
     def pause_job(self, job_id:str, jobstore:str=None) -> Dict:
@@ -82,5 +82,5 @@ class SchedulerService:
     def get_stores(self) -> List[str]:
         return list(self.scheduler._jobstores.keys())
 
-    def get_excutors(self) -> List[str]:
+    def get_executors(self) -> List[str]:
         return list(self.scheduler._executors.keys())
