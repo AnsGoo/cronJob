@@ -50,11 +50,11 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    BD_HOST: str
+    DB_HOST: str
     DB_USER: str
     DB_PASSWORD: str
     DB_NAME: str
-    BD_PORT: str
+    DB_PORT: str
     DATABASE_URI: Optional[MySQLDSN] = None
 
     @validator("DATABASE_URI", pre=True)
