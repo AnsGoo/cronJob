@@ -23,14 +23,14 @@ class MySQLDSN(AnyUrl):
     @classmethod
     def build(cls,
               scheme: str,
-              user: str,
-              password: str,
-              dbname: str,
-              host: str,
+              user: str = '',
+              password: str = '',
+              dbname: str = '',
+              host: str = '',
               port: str = '3306',
-              options: Optional[dict] = dict()
+              **kwargs
               ) -> str:
-        option_list = [key + '=' + value for key, value in options.items()]
+        option_list = [key + '=' + value for key, value in kwargs.items()]
         option_str = '&'.join(option_list)
         if not option_str:
             return '%s://%s:%s@%s:%s/%s' %(scheme, user, password, host, port, dbname)
@@ -39,7 +39,7 @@ class MySQLDSN(AnyUrl):
 
 class Settings(BaseSettings):
     DEBUG: bool=False
-    PROJECT_NAME: str
+    PROJECT_NAME: str = ''
     BACKEND_CORS_ORIGINS: List[Union[AnyHttpUrl,str]] = []
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
@@ -50,39 +50,40 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    DB_HOST: str
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_NAME: str
-    DB_PORT: str
-    DATABASE_URI: Optional[MySQLDSN] = None
+    DB_HOST: str = ''
+    DB_USER: str = ''
+    DB_PASSWORD: str = ''
+    DB_NAME: str = ''
+    DB_PORT: str = ''
+    DATABASE_URI: Optional[str] = None
 
     @validator("DATABASE_URI", pre=True)
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
         if isinstance(v, str):
             return v
+        
         return MySQLDSN.build(
-            host=values.get("BD_HOST"),
-            dbname=values.get('DB_NAME'),
+            host=values.get("DB_HOST", ""),
+            dbname=values.get('DB_NAME', ""),
             scheme="mysql+pymysql",
-            user=values.get("DB_USER",'root'),
-            password=values.get("DB_PASSWORD"),
-            port=values.get("BD_PORT",'3306')
+            user=values.get("DB_USER", 'root'),
+            password=values.get("DB_PASSWORD", ""),
+            port=values.get("DB_PORT",'3306')
         )
 
-    SCHEDULER_CONFIG: Optional[SchedulerConfig]
+    SCHEDULER_CONFIG: Optional[SchedulerConfig] = None
 
     @validator("SCHEDULER_CONFIG", pre=True)
     def init_scheduler(cls, v: Optional[SchedulerConfig], values: Mapping[str, Any]) -> SchedulerConfig:
         url = MySQLDSN.build(
-            host=values.get("BD_HOST"),
-            dbname=values.get('DB_NAME'),
+            host=values.get("DB_HOST", ""),
+            dbname=values.get('DB_NAME', ""),
             scheme="mysql+pymysql",
-            user=values.get("DB_USER",'root'),
-            password=values.get("DB_PASSWORD"),
-            port=values.get("BD_PORT",'3306')
+            user=values.get("DB_USER", 'root'),
+            password=values.get("DB_PASSWORD", ""),
+            port=values.get("DB_PORT",'3306')
         )
-
+        
         return SchedulerConfig(executors={
                 'default': JobExecutorPool(type='thread',size=3).build(),
                 'processpool': JobExecutorPool(type='process',size=3).build()
@@ -95,7 +96,7 @@ class Settings(BaseSettings):
                 'default': JobStore(type='sqlalchemy', url=url).build()
             }
         )
-    RPC_URL:str
+    RPC_URL:str = ''
     RPC_POOL_SIZE:int = 1
     class Config:
         case_sensitive = True

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Path, Query, Body, Form, Request, status, Respons
 from fastapi.exceptions import HTTPException
 from zerorpc.core import Client
 from app.common.resp_code import resp_200, resp_201, resp_202, resp_400
+from app.common.logger import logger
 from job.schemas import JobSchema, TriggerSchema, JobQueryParams
 from apscheduler.job import Job
 from job.tasks import Task
@@ -21,7 +22,6 @@ def _get_job(job_id: str, client:Client=None) -> Job:
         return job
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='%s not found' %job_id)
-
 
 
 @router.get("/jobs/", tags=["job"], summary="获取所有job信息")
@@ -58,7 +58,7 @@ async def get_job(
 
 # cron 更灵活的定时任务 可以使用crontab表达式
 @router.post("/jobs/", tags=["job"], summary='添加job')
-async def add_job(request: Request,job: JobSchema) -> Response:
+async def add_job(request: Request, job: JobSchema) -> Response:
     data = await request.json()
     with get_client(settings.RPC_URL) as client:
         instance, msg = client.add_job(data)
@@ -72,10 +72,14 @@ async def add_job(request: Request,job: JobSchema) -> Response:
 async def remove_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
-    _get_job(job_id=job_id)
-    with get_client(settings.RPC_URL) as client:
-        result = client.remove_job(job_id, client=client)
-    return resp_202(result)
+    try:
+        with get_client(settings.RPC_URL) as client:
+            result = client.remove_job(job_id, client=client)
+            print(result)
+    except Exception as e:
+        logger.error(e)
+        return resp_400()
+    return resp_202()
 
 @router.get("/job/{job_id}/pause/", tags=["job"], summary="暂停任务")
 async def pause_job(
