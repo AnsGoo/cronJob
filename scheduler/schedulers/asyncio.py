@@ -1,14 +1,13 @@
 from __future__ import absolute_import
-import os
 import six
-from typing import List, Optional
+from typing import Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.schedulers.base import STATE_STOPPED
 
 
 class ExtendAsyncIOScheduler(AsyncIOScheduler):
-    def query_jobs(self, jobstore: str=None, conditions: Optional[dict]=dict()):
+    def query_jobs(self, jobstore: str='default', conditions: Optional[dict]=dict()):
         with self._jobstores_lock:
             jobs = []
             if self.state == STATE_STOPPED:

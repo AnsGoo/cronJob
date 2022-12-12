@@ -1,8 +1,8 @@
 
 
-from typing import Dict, Optional
+from typing import Optional
 from pydantic import ValidationError
-from fastapi import APIRouter, Path, Query, Body, Form, Request, status, Response
+from fastapi import APIRouter, Path, Query, Body, status, Response
 from fastapi.exceptions import HTTPException
 from zerorpc.core import Client
 from app.common.resp_code import resp_200, resp_201, resp_202, resp_400
@@ -16,7 +16,7 @@ from app.config import settings
 
 router = APIRouter()
 
-def _get_job(job_id: str, client:Client=None) -> Job:
+def _get_job(job_id: str, client:Client) -> Job:
     job = client.get_job(job_id)
     if job:
         return job
@@ -26,7 +26,6 @@ def _get_job(job_id: str, client:Client=None) -> Job:
 
 @router.get("/jobs/", tags=["job"], summary="获取所有job信息")
 async def get_jobs(
-        request: Request,
         state: Optional[str] = Query(None, title='job 状态',description='可选参数 RUNNING STOP'),
         name: Optional[str] = Query(None, title='job name'),
         trigger: Optional[str] = Query(None, title='触发器类型', description='可选参数：date cron interval'),
@@ -37,10 +36,9 @@ async def get_jobs(
     :return:
     """
     try:
-        query_params =  request.query_params._dict
-        query_condtions = JobQueryParams(**query_params)
+        query_condtions = JobQueryParams(state=state, name=name, trigger=trigger, func=func)
     except ValidationError as e:
-        return resp_400(e.errors())
+        return resp_400(e.json())
     with get_client(settings.RPC_URL) as client:
         conditions = remove_none(query_condtions.dict())
         jobs = client.query_jobs('default', conditions)
@@ -53,15 +51,14 @@ async def get_job(
 ) -> Response:
     with get_client(settings.RPC_URL) as client:
         job = _get_job(job_id=job_id, client=client)
-    return resp_200(job)
+        return resp_200(job)
 
 
 # cron 更灵活的定时任务 可以使用crontab表达式
 @router.post("/jobs/", tags=["job"], summary='添加job')
-async def add_job(request: Request, job: JobSchema) -> Response:
-    data = await request.json()
+async def add_job(job: JobSchema) -> Response:
     with get_client(settings.RPC_URL) as client:
-        instance, msg = client.add_job(data)
+        instance, msg = client.add_job(job.to_dict())
     if instance:
         return resp_201(instance)
     else:
@@ -103,15 +100,13 @@ async def resume_job(
 
 @router.put("/job/{job_id}/reschedule/", tags=["job"], summary="重新调度任务")
 async def reschedule_job(
-        request: Request,
         trigger: TriggerSchema,
         job_id: str = Path(...,title="任务id", embed=True),
         jobstore: Optional[str] = Body('default')
 ) -> Response:
     with get_client(settings.RPC_URL) as client: 
-        _get_job(job_id=job_id, client=client)
-        data = await request.json()       
-        job, result = client.reschedule_job(job_id, data.get('trigger'), jobstore)
+        _get_job(job_id=job_id, client=client)     
+        job, result = client.reschedule_job(job_id, trigger.dict(), jobstore)
     return resp_202(job)
 
 

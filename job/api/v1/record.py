@@ -1,13 +1,11 @@
 
 from typing import Optional
-from fastapi import APIRouter, Query, Request, Response
+from fastapi import APIRouter, Query, Response
 
-from job.schemas import RecordQueryParams
-from app.common.resp_code import resp_200, resp_400
+from app.common.resp_code import resp_200
 from job.models import JobRecord
 from app.database import db
 from utils.common import remove_none
-from pydantic import ValidationError
 
 router = APIRouter()
 

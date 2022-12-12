@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 class BaseTask:
     def methods(self) -> List[str]:

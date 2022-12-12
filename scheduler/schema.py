@@ -58,7 +58,7 @@ class SchedulerConfig(BaseModel):
 
 
     @validator('executors', pre=True)
-    def validate_executors(cls, executors: Mapping[str, JobExecutorPool], values: Optional[Dict]) -> Dict[str,JobExecutorPool]:
+    def validate_executors(cls, executors: Mapping[str, JobExecutorPool], values: Optional[Dict]) -> Mapping[str,JobExecutorPool]:
         if 'default' in executors:
             return executors
         else:
@@ -66,7 +66,7 @@ class SchedulerConfig(BaseModel):
 
 
     @validator('stores', pre=True)
-    def validate_stores(cls, stores: Mapping[str, JobStore], values: Optional[Dict]) -> Dict[str, JobStore]:
+    def validate_stores(cls, stores: Mapping[str, JobStore], values: Optional[Dict]) -> Mapping[str, JobStore]:
         if 'default' in stores:
             return stores
         else:

@@ -1,4 +1,3 @@
-from typing import Dict, List
 from scheduler.task import BaseTask
 
 class Task(BaseTask):

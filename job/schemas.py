@@ -1,15 +1,13 @@
 from datetime import date, datetime
 from typing import Optional, List, Dict, Union, Any
-from xmlrpc.client import Boolean
-from fastapi import Query
 from apscheduler.triggers.cron.fields import (
-    BaseField, MonthField, WeekField, DayOfMonthField, DayOfWeekField, DEFAULT_VALUES)
+    BaseField, MonthField, DayOfMonthField, DayOfWeekField, DEFAULT_VALUES)
 from apscheduler.util import undefined
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.date import DateTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-from pydantic import BaseModel, validator, ValidationError, conint
+from pydantic import BaseModel, validator, conint
 
 from .tasks import Task
 
@@ -30,7 +28,7 @@ class TriggerSchema(BaseModel):
 
 
     @validator('run_time')
-    def validate_run_time(cls, run_time:str, values: Optional[Dict]) -> str:
+    def validate_run_time(cls, run_time:str, values: Dict) -> str:
         if values['trigger'] == 'date':
             try:
                 datetime.strptime(run_time, '%Y-%m-%d %H:%M:%S')
@@ -144,6 +142,16 @@ class JobSchema(BaseModel):
     # misfire_grace_time = undefined, coalesce = undefined, max_instances = undefined,
     # next_run_time = undefined,
 
+    def to_dict(self) -> Dict[str, Any]:
+        data = self.dict()
+        keys = list(data.keys())
+        for k in keys:
+            if data[k] == undefined:
+                data.pop(k)
+        
+        data["func"] = self.func.__name__
+        print(222, type(data))
+        return data
 
     @validator('next_run_time', always=True)
     def validate_next_run_time(cls, next_run_time:datetime, values: Optional[Dict]) -> str:
@@ -184,14 +192,14 @@ class JobSchema(BaseModel):
 
 
 class JobQueryParams(BaseModel):
-    state: Optional[Boolean]
+    state: Optional[str]
     name: Optional[str]
     trigger: Optional[str]
     func: Optional[str]
 
 
     @validator('state', pre=True)
-    def validate_state(cls, state: str, values: Optional[Dict]) -> str:
+    def validate_state(cls, state: str, values: Optional[Dict]) -> Optional[bool]:
         if state == 'RUNNING':
             return True
         elif state == 'STOP':

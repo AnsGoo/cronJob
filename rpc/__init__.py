@@ -16,7 +16,7 @@ class SchedulerService:
     def __init__(self, scheduler) -> None:
         self.scheduler = scheduler
 
-    def add_job(self, data:Dict) -> Tuple:
+    def add_job(self, data: Dict) -> Tuple:
         job_id = str(uuid.uuid1())
         try:
             schema = JobSchema(**data)

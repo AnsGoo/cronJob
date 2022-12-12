@@ -2,7 +2,7 @@
 import six
 import dateutil.parser
 from datetime import datetime
-from typing import Union, List, Dict, Tuple
+from typing import Union, Dict, Tuple
 
 
 from collections import OrderedDict

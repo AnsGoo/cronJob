@@ -1,14 +1,10 @@
 
-import os
-import fcntl
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from .route import router
 from app.config import settings
-from app.common.logger import logger
 from .database import create_table
-from app.state import default_state
 
 
 def get_application():

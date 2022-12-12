@@ -1,4 +1,6 @@
 
+from pathlib import Path
+from urllib.parse import quote_plus
 from typing import Any, Dict, List, Mapping, Optional, Union
 
 from pydantic import AnyHttpUrl, BaseSettings, validator, AnyUrl
@@ -6,7 +8,6 @@ from pydantic import AnyHttpUrl, BaseSettings, validator, AnyUrl
 from scheduler.schema import SchedulerConfig
 from scheduler.schema import SchedulerConfig, JobStore, JobExecutorPool
 
-from pathlib import Path
 
 BASE_DIR = Path.cwd()
 
@@ -33,9 +34,9 @@ class MySQLDSN(AnyUrl):
         option_list = [key + '=' + value for key, value in kwargs.items()]
         option_str = '&'.join(option_list)
         if not option_str:
-            return '%s://%s:%s@%s:%s/%s' %(scheme, user, password, host, port, dbname)
+            return '%s://%s:%s@%s:%s/%s' %(scheme, user, quote_plus(password), host, port, dbname)
         else:
-            return '%s://%s:%s@%s:%s/%s?%s' %(scheme, user, password, host, port, dbname, option_str)
+            return '%s://%s:%s@%s:%s/%s?%s' %(scheme, user, quote_plus(password), host, port, dbname, option_str)
 
 class Settings(BaseSettings):
     DEBUG: bool=False

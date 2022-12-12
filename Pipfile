@@ -24,4 +24,4 @@ python_version = "3.8"
 [scripts]
 rpc = "python rpc_server.py"
 server = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
-dev = "uvicorn app.main:app --reload"
+dev = "uvicorn app.main:app --host 0.0.0.0 --reload"
