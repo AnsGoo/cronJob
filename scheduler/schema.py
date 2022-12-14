@@ -29,6 +29,8 @@ class JobExecutorPool(BaseModel):
             return ThreadPoolExecutor(self.size)
         elif self.type == 'process':
             return ProcessPoolExecutor(self.size)
+        else:
+            raise NotImplementedError('%s executor are not implemente' % self.type )
 
 
 class Store(Enum):
@@ -45,7 +47,7 @@ class JobStore(BaseModel):
         if self.type == 'sqlalchemy':
             return ExtendSQLAlchemyJobStore(self.url)
         else:
-            raise NotImplementedError('%s are not implemente' %self.name.value )
+            raise NotImplementedError('%s store are not implemente' % self.type )
 
 class Default(BaseModel):
     coalesce: bool = False

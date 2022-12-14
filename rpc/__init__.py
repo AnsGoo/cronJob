@@ -25,7 +25,7 @@ class SchedulerService:
             return None, e.json()
 
         job = self.scheduler.add_job(
-            func=schema.func,
+            func=schema.func[1],
             trigger=schema.trigger.build(),
             args=schema.args,
             kwargs=schema.kwargs,
@@ -63,7 +63,7 @@ class SchedulerService:
     def remove_job(self, job_id:str, jobstore:str=None) -> str:
         logger.info('job[%s] has been removed' %job_id)
         self.scheduler.remove_job(job_id, jobstore)
-        return Result.sucess
+        return {"result": Result.sucess.value}
 
     def get_job(self, job_id:str) -> Dict:
         job = self.scheduler.get_job(job_id)

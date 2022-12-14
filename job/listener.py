@@ -6,15 +6,11 @@ from scheduler.listener import JobBaseListener
 from app.database import db
 from app.common.logger import logger
 from .models import JobRecord
-from .tasks import Task
-
-
 
 
 class CronJobListener(JobBaseListener):
 
     def save_record(self,event: JobEvent, job: Job) -> None:
-
         result = None
         if event.code == EVENT_JOB_EXECUTED:
             result = 'SUCCESS'
@@ -23,14 +19,10 @@ class CronJobListener(JobBaseListener):
         elif event.code == EVENT_JOB_MISSED:
             result = 'MISSED'
 
-        args = []
-        if len(job.args) > 1:
-            args = [arg for arg in job.args if not isinstance(arg,Task)]
-
         data = {
                 'job_id': job.id,
                 'name': job.name,
-                'args': json.dumps(args),
+                'args': json.dumps(job.args),
                 'kwargs': json.dumps(job.kwargs),
                 'trigger': get_job_trigger_name(job.trigger),
                 'result': result,

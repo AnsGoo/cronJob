@@ -12,26 +12,27 @@
 """
 from typing import Union
 
+from typing import Any
 from fastapi import status
 from fastapi.responses import JSONResponse, Response
 from fastapi.encoders import jsonable_encoder
 
 
-def resp_200(data: Union[list, dict, str] = {}) -> Response:
+def resp_200(data: Union[list, dict, str, Any] = {}) -> Response:
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content=jsonable_encoder(data)
     )
 
 
-def resp_201(data: Union[list, dict, str] = {}) -> Response:
+def resp_201(data: Union[list, dict, str, Any] = {}) -> Response:
     return JSONResponse(
         status_code=status.HTTP_201_CREATED,
         content=jsonable_encoder(data)
     )
 
 
-def resp_202(data: Union[list, dict, str] = {}) -> Response:
+def resp_202(data: Union[list, dict, str, Any] = {}) -> Response:
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,
         content=jsonable_encoder(data)

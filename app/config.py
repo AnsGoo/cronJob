@@ -99,6 +99,8 @@ class Settings(BaseSettings):
         )
     RPC_URL:str = ''
     RPC_POOL_SIZE:int = 1
+
+    TASK_SCRIPT_PATH: Path = BASE_DIR.joinpath('task')
     class Config:
         case_sensitive = True
         env_file = ".env"

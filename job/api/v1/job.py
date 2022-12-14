@@ -9,7 +9,6 @@ from app.common.resp_code import resp_200, resp_201, resp_202, resp_400
 from app.common.logger import logger
 from job.schemas import JobSchema, TriggerSchema, JobQueryParams
 from apscheduler.job import Job
-from job.tasks import Task
 from utils.common import remove_none
 from rpc.client import get_client
 from app.config import settings
@@ -24,7 +23,7 @@ def _get_job(job_id: str, client:Client) -> Job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='%s not found' %job_id)
 
 
-@router.get("/jobs/", tags=["job"], summary="获取所有job信息")
+@router.get("/jobs", summary="获取所有job信息")
 async def get_jobs(
         state: Optional[str] = Query(None, title='job 状态',description='可选参数 RUNNING STOP'),
         name: Optional[str] = Query(None, title='job name'),
@@ -45,7 +44,7 @@ async def get_jobs(
     return resp_200(data=jobs)
 
 
-@router.get("/jobs/{job_id}", tags=["job"], summary="获取指定的job信息")
+@router.get("/jobs/{job_id}", summary="获取指定的job信息")
 async def get_job(
         job_id: str = Query("job_id", title="job id")
 ) -> Response:
@@ -55,7 +54,7 @@ async def get_job(
 
 
 # cron 更灵活的定时任务 可以使用crontab表达式
-@router.post("/jobs/", tags=["job"], summary='添加job')
+@router.post("/jobs", summary='添加job')
 async def add_job(job: JobSchema) -> Response:
     with get_client(settings.RPC_URL) as client:
         instance, msg = client.add_job(job.to_dict())
@@ -65,7 +64,7 @@ async def add_job(job: JobSchema) -> Response:
         return resp_400(msg)
 
 
-@router.delete("/job/{job_id}/", tags=["job"], summary="移除任务")
+@router.delete("/job/{job_id}", summary="移除任务")
 async def remove_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
@@ -78,7 +77,7 @@ async def remove_job(
         return resp_400()
     return resp_202()
 
-@router.get("/job/{job_id}/pause/", tags=["job"], summary="暂停任务")
+@router.get("/job/{job_id}/pause", summary="暂停任务")
 async def pause_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
@@ -88,7 +87,7 @@ async def pause_job(
     return resp_202(job)
 
 
-@router.get("/job/{job_id}/resume/", tags=["job"], summary="恢复任务")
+@router.get("/job/{job_id}/resume", summary="恢复任务")
 async def resume_job(
         job_id: str = Path(..., title="任务id", embed=True)
 ) -> Response:
@@ -98,7 +97,7 @@ async def resume_job(
     return resp_202(job)
 
 
-@router.put("/job/{job_id}/reschedule/", tags=["job"], summary="重新调度任务")
+@router.put("/job/{job_id}/reschedule", summary="重新调度任务")
 async def reschedule_job(
         trigger: TriggerSchema,
         job_id: str = Path(...,title="任务id", embed=True),
@@ -110,28 +109,15 @@ async def reschedule_job(
     return resp_202(job)
 
 
-@router.get("/job/stores/", tags=["job"], summary="获取stores")
+@router.get("/job/stores", summary="获取stores")
 async def get_stores() -> Response:
     with get_client(settings.RPC_URL) as client:
         stores = client.get_stores()
     return resp_200(data=[{ 'name': item for item in stores}])
 
 
-@router.get("/job/executors/", tags=["job"], summary="获取")
+@router.get("/job/executors", summary="获取")
 async def get_executors() -> Response:
     with get_client(settings.RPC_URL) as client:
         executors = client.get_executors()
     return resp_200(data=[{ 'name': item for item in executors}])
-
-@router.get("/job/tasks/", tags=["job"], summary="获取可用Task")
-async def get_tasks() -> Response:
-    tasks = Task().methods()
-    data = []
-    for task in tasks:
-        data.append(
-            {
-                'name': task,
-                'desc': getattr(Task(),task).__doc__
-            }
-        )
-    return resp_200(data=data)

@@ -9,7 +9,7 @@ from utils.common import remove_none
 
 router = APIRouter()
 
-@router.get("/records/", tags=["record"], summary="获取所有job记录")
+@router.get("/records", summary="获取所有job记录")
 async def get_records(
         result: Optional[str] = Query(None, title='job 状态',description='可选参数 SUCCESS FAILED MISSED'),
         name: Optional[str] = Query(None, title='job name'),

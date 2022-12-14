@@ -5,7 +5,6 @@ from job.listener import CronJobListener
 from app.common.logger import logger
 from app.config import settings
 from rpc import SchedulerService
-from app.config import settings
 
 
 config = settings.SCHEDULER_CONFIG
@@ -19,7 +18,7 @@ scheduler.add_listener(listener,EVENT_JOB_EXECUTED|EVENT_JOB_ERROR|EVENT_JOB_MIS
 scheduler.start()
 try:
     logger.info('schduler has been started')
-    server = zerorpc.Server(SchedulerService(scheduler=scheduler),pool_size=settings.RPC_POOL_SIZE)
+    server = zerorpc.Server(SchedulerService(scheduler=scheduler),pool_size=settings.RPC_POOL_SIZE, heartbeat=60)
     server.bind(settings.RPC_URL)
     logger.info('RPC server is run at %s' %settings.RPC_URL)
     server.run()
